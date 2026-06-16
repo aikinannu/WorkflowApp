@@ -1,0 +1,23 @@
+const path = require('path');
+const exclusionList = require('metro-config/src/defaults/exclusionList');
+
+const projectRoot = __dirname;
+const parentNodeModules = path.resolve(projectRoot, '..', 'node_modules');
+
+module.exports = {
+  projectRoot,
+  watchFolders: [
+    // Ensure Metro watches the project root (useful in monorepos)
+    path.resolve(projectRoot),
+  ],
+  resolver: {
+    extraNodeModules: {
+      react: path.resolve(projectRoot, 'node_modules', 'react'),
+      'react-dom': path.resolve(projectRoot, 'node_modules', 'react-dom'),
+    },
+    // Only resolve from this project's node_modules to avoid hoisted copies
+    nodeModulesPaths: [path.resolve(projectRoot, 'node_modules')],
+    // Block the parent workspace node_modules so Metro won't pull a different React
+    blockList: exclusionList([new RegExp(parentNodeModules.replace(/[/\\\\]/g, '\\\\') + '.*')]),
+  },
+};

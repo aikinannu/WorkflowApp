@@ -1,0 +1,56 @@
+name: Backend CI — Build & Smoke Test
+
+on:
+  push:
+    paths:
+      - 'myApp-backend/**'
+  pull_request:
+    paths:
+      - 'myApp-backend/**'
+
+jobs:
+  build-and-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          cd myApp-backend
+          npm ci
+
+      - name: Start backend (background)
+        env:
+          PORT: 8000
+        run: |
+          cd myApp-backend
+          nohup npm start > backend.log 2>&1 &
+          echo "Waiting for http://localhost:8000/health..."
+          for i in $(seq 1 30); do
+            if curl -sSf http://localhost:8000/health > /dev/null; then
+              echo "Backend is up"
+              break
+            fi
+            sleep 1
+          done
+
+      - name: Smoke test endpoints
+        run: |
+          cd myApp-backend
+          echo "Checking /health"
+          curl -sSf http://localhost:8000/health
+          echo "Checking /api/v1/marketplace/products"
+          curl -sSf http://localhost:8000/api/v1/marketplace/products | grep -q '"success": true'
+
+      - name: Upload backend log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-log
+          path: myApp-backend/backend.log

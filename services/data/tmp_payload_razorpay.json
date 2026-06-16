@@ -1,0 +1,1 @@
+{"event":"payment.authorized","payload":{"subscription":{"entity":{"id":"RZP-PAY-456","amount":299900,"currency":"INR","metadata":{"license_key":"GDWB-TEST-RZP-0001"}}}}}
