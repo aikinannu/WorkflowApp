@@ -1,12 +1,7 @@
 name: Backend CI — Build & Smoke Test
 
 on:
-  push:
-    paths:
-      - 'myApp-backend/**'
-  pull_request:
-    paths:
-      - 'myApp-backend/**'
+  workflow_dispatch:
 
 jobs:
   build-and-smoke:
